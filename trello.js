@@ -23,7 +23,7 @@ var Trello = class {
             //throw("Invalid API key or token");
             log('ERROR!');
         }
-        log(`message results ${message.response_body.data}`)
+        //log(`message results ${message.response_body.data}`)
         return JSON.parse(message.response_body.data);
     }
 

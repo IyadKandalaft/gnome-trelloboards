@@ -1,5 +1,6 @@
 
 const	
+		PanelMenu = imports.ui.panelMenu;
 		St      = imports.gi.St,
 		Gio     = imports.gi.Gio,
 		Main  	= imports.ui.main,
@@ -15,8 +16,8 @@ const	Trello	= Me.imports.trello;
 
 
 var user="iyadkandalaft1",
-	apikey="REDACTED",
-	token="REDACTED";
+	apikey="cc6e37f8ff4a15dea4a5346003bc0528",
+	token="d546c3d058a48034288e701bdde7d8f923818963557e2c23771ff53fc0f5fc96";
 	
 //const	SUI            = Local.imports.switcherUI,
 //		Utils          = Local.imports.utils;
@@ -29,7 +30,7 @@ const TrelloBoardsExt = GObject.registerClass(
 	{
 		GTypeName: 'TrelloBoards'
 	},
-	class TrelloBoards extends GObject.Object {
+	class TrelloBoards extends PanelMenu.Button {
 
 	/**
 	 * _init:
@@ -42,6 +43,11 @@ const TrelloBoardsExt = GObject.registerClass(
 		var trello = new Trello.Trello(user, apikey, token);
 		logm('Signed in user: ' + trello.user().info.aaEmail);
 		logm('User is a member of boards: ' + trello.boards().boardIds);
+		var button = new PanelMenu.Button();
+		let label = new St.Label({text: "Trello"});
+		button.add_actor(label);
+		//button.actor.connect('button-press-event', _showMenu);
+		Main.panel.addToStatusArea('services', button);
 	}
 
 	/**
