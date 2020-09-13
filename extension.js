@@ -1,6 +1,7 @@
 
 const	
-		PanelMenu = imports.ui.panelMenu;
+		PanelMenu = imports.ui.panelMenu,
+		PopupMenu = imports.ui.popupMenu,
 		St      = imports.gi.St,
 		Gio     = imports.gi.Gio,
 		Main  	= imports.ui.main,
@@ -24,13 +25,13 @@ var user="iyadkandalaft1",
 
 //const MessageTray = imports.ui.messageTray;
 
-let _extension;
+var _extension;
 
 const TrelloBoardsExt = GObject.registerClass(
 	{
 		GTypeName: 'TrelloBoards'
 	},
-	class TrelloBoards extends PanelMenu.Button {
+	class TrelloBoards extends PanelMenu.Button  {
 
 	/**
 	 * _init:
@@ -40,14 +41,36 @@ const TrelloBoardsExt = GObject.registerClass(
 	 */
 	_init() 
 	{
-		var trello = new Trello.Trello(user, apikey, token);
-		logm('Signed in user: ' + trello.user().info.aaEmail);
-		logm('User is a member of boards: ' + trello.boards().boardIds);
-		var button = new PanelMenu.Button();
-		let label = new St.Label({text: "Trello"});
-		button.add_actor(label);
-		//button.actor.connect('button-press-event', _showMenu);
-		Main.panel.addToStatusArea('services', button);
+		logm("WTF!");
+		
+		super._init(0.0);
+
+		let label = new St.Label({
+			text: 'Trello',
+			'y-align': 2
+		});
+		this.add_child(label);
+
+		Main.panel.addToStatusArea('services', this);
+
+		this.trello = new Trello.Trello(user, apikey, token);
+		logm('Signed in user: ' + this.trello.user().info.aaEmail);
+		//logm('User is a member of boards: ' + trello.boards().boardIds);
+		for (const trelloBoard of this.trello.boards().items) {
+			let subMenu = new PopupMenu.PopupSubMenuMenuItem(trelloBoard.info.name);
+			subMenu.connect('button-press-event', function(){ Main.notify(trelloBoard.info.desc) });
+			this.menu.addMenuItem(subMenu);
+			
+			for (const trelloList of trelloBoard.lists().items) {
+				let openMenuItem = new PopupMenu.PopupMenuItem(trelloList.info.name);
+				let menuSeparator = new PopupMenu.PopupSeparatorMenuItem();
+				subMenu.menu.addMenuItem(openMenuItem);
+				subMenu.menu.addMenuItem(menuSeparator);
+			}
+			
+
+		}
+
 	}
 
 	/**
@@ -58,6 +81,7 @@ const TrelloBoardsExt = GObject.registerClass(
 	 */	
 	_destroy()
 	{
+		this.destroy();
 		logm('Called DisplayExtension.destroy');
 	}
 });
@@ -80,7 +104,7 @@ function disable()
 {
 	logm('Disabling extension');
 
-	if( _extension ) {
+	if( _extension !== null ) {
 		_extension._destroy();
 		_extension = null;
 	}
