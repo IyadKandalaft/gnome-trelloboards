@@ -52,25 +52,35 @@ const TrelloBoardsExt = GObject.registerClass(
 		this.add_child(label);
 
 		Main.panel.addToStatusArea('services', this);
+			
+		this._populate_menu();
+		
+	}
 
+	async _populate_menu(){
 		this.trello = new Trello.Trello(user, apikey, token);
 		logm('Signed in user: ' + this.trello.user().info.aaEmail);
 		//logm('User is a member of boards: ' + trello.boards().boardIds);
 		for (const trelloBoard of this.trello.boards().items) {
 			let subMenu = new PopupMenu.PopupSubMenuMenuItem(trelloBoard.info.name);
-			subMenu.connect('button-press-event', function(){ Main.notify(trelloBoard.info.desc) });
+			//Main.notify(trelloBoard.info.desc)
+			subMenu.connect('button-press-event', function(){  });
 			this.menu.addMenuItem(subMenu);
 			
 			for (const trelloList of trelloBoard.lists().items) {
-				let openMenuItem = new PopupMenu.PopupMenuItem(trelloList.info.name);
+				let listMenuItem = new PopupMenu.PopupMenuItem(trelloList.info.name);
 				let menuSeparator = new PopupMenu.PopupSeparatorMenuItem();
-				subMenu.menu.addMenuItem(openMenuItem);
+				subMenu.menu.addMenuItem(listMenuItem);
 				subMenu.menu.addMenuItem(menuSeparator);
+
+				let trelloCards = trelloList.cards();
+				for (const trelloCard of trelloCards.items) {
+					let cardTitle = trelloCard.info.name.substring(0, 59);
+					let cardMenuItem = new PopupMenu.PopupMenuItem(cardTitle);
+					subMenu.menu.addMenuItem(cardMenuItem);
+				}
 			}
-			
-
 		}
-
 	}
 
 	/**
